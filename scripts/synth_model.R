@@ -35,9 +35,19 @@ df_select <- as.data.frame(df_select)
 
 # Rodando Controle Sintético
 
+
 dataprep_out <- dataprep(foo = df_select,
                          predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc", "homic"),
                          predictors.op = "mean",
+                         special.predictors = list(
+                           list("desemp", 1992:2006, c("mean")),
+                           list("gini", 1992:2006, c("mean")),
+                           list("log_rpc", 1992:2006, c("mean")),
+                           list("pct_urb", 1992:2006, c("mean")),
+                           list("pct_jov", 1992:2006, c("mean")),
+                           list("freqesc", 1992:2006, c("mean")),
+                           list("homic", c(2006), c("mean"))
+                         ),
                          time.predictors.prior = c(1992:2006),
                          dependent = "homic",
                          unit.variable = "tcode",
