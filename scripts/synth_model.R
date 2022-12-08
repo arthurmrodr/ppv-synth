@@ -2,6 +2,8 @@ library(Synth)
 library(caret)
 library(tidyselect)
 library(plm)
+library(tidyverse)
+
 
 # Reading dataframe generated in "data_treatment.R"
 
@@ -34,7 +36,7 @@ df_select <- as.data.frame(df_select)
 # Rodando Controle Sintético
 
 dataprep_out <- dataprep(foo = df_select,
-                         predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc"),
+                         predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc", "homic"),
                          predictors.op = "mean",
                          time.predictors.prior = c(1992:2006),
                          dependent = "homic",
