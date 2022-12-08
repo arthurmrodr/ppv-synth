@@ -3,6 +3,10 @@ library(caret)
 library(tidyselect)
 library(plm)
 
+# Reading dataframe generated in "data_treatment.R"
+
+df_join <- read_rds("data/db_ufs.RDS")
+
 # Data preparation
 
 df_join$ano <- as.numeric(df_join$ano)

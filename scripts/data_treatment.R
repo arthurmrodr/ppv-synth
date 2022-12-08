@@ -56,4 +56,6 @@ df_join <- reduce(list(desemp, gini, rendad_pc, pop_tot, homic, pop_urb, freqesc
 
 df_join <- df_join %>% mutate(ano = substr(id, 4, 7))
 
+# Criando arquivo RDS
 
+write_rds(df_join, "data/db_ufs.RDS")
