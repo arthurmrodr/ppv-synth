@@ -1,7 +1,5 @@
 library(Synth)
-library(caret)
 library(tidyselect)
-library(plm)
 library(tidyverse)
 
 
@@ -18,10 +16,9 @@ df_select <- df_select %>% mutate(tcode = substr(id, 1, 2))
 
 
 
-
-df_select <- df_select %>%
-  group_by(tcode) %>%
-  mutate(homic = ifelse(is.na(homic), (dplyr::lag(homic) + dplyr::lead(homic)) / 2, homic)) # Caso não exista dado de homicídio, considera-se a média do ano anterior e seguinte
+#df_select <- df_select %>%
+#  group_by(tcode) %>%
+#  mutate(homic = ifelse(is.na(homic), (dplyr::lag(homic) + dplyr::lead(homic)) / 2, homic)) # Caso não exista dado de homicídio, considera-se a média do ano anterior e seguinte
 
 df_select <- df_select %>% mutate(pct_urb = popurb / pop_tot,
                                   pct_jov = (pop1519m + pop2024m) / pop_tot,
@@ -32,11 +29,13 @@ df_select$tcode <- as.numeric(df_select$tcode)
 
 df_select <- as.data.frame(df_select)
 
+df_standardized <- df_select %>% mutate_at(vars(desemp, gini, rendad_pc, homic, freqesc, pct_jov, pct_urb, log_rpc), scale)
+
 
 # Rodando Controle Sintético
 
 
-dataprep_out <- dataprep(foo = df_select,
+dataprep_out <- dataprep(foo = df_standardized,
                          predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc", "homic"),
                          predictors.op = "mean",
                          special.predictors = list(
@@ -53,16 +52,15 @@ dataprep_out <- dataprep(foo = df_select,
                          unit.variable = "tcode",
                          time.variable = "ano",
                          treatment.identifier = 26,
-                         controls.identifier = c(#11, 12, 13, 14, 15, 16, 17,
-                                                 21, 22, 23, 24, 25, 27, 28, 29#,
-                                                 #31, 32, 33, 35,
-                                                 #41, 42, 43,
-                                                 #50, 51, 52, 53),
-                         ),
+                         controls.identifier = c(11, 12, 13, 14, 15, 16, 17,
+                                                 21, 22, 23, 24, 25, 27, 28, 29,
+                                                 31, 32, 33, 35,
+                                                 41, 42, 43,
+                                                 50, 51, 52, 53),
                          time.optimize.ssr = c(1992:2007),
                          time.plot = c(1992:2014))
 
-synth_out = dataprep_out %>% synth()
+synth_out = dataprep_out %>% synth(neg = T, normalize = F)
 
 synth_out %>% path.plot(dataprep.res = dataprep_out, tr.intake = 2007)
 
