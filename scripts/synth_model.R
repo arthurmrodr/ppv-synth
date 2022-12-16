@@ -7,7 +7,7 @@ library(tidyverse)
 
 df_join <- read_rds("data/db_ufs2.RDS")
 
-# Data preparation
+##### Data preparation ####
 
 df_join$ano <- as.numeric(df_join$ano)
 df_join <- df_join %>% filter(ano >= 1992 & ano <= 2014)
@@ -29,24 +29,20 @@ df_standardized <- df_select %>% mutate_at(vars(desemp, gini, rendad_pc, homic, 
 
 df_standardized <- as.data.frame(df_standardized)
 
-#### Rodando Controle Sintético ####
+#### Synthetic Control ####
 
 # Sem variável de homicídio
 
-dataprep_m1 <- dataprep(foo = df_standardized,
-                         predictors = c("desemp", "gini", "rendad_pc", "pct_urb", "pct_jov", "freqesc", "homic", "tsuicid", "desp_pc"),
+dataprep_m1 <- dataprep(foo = df_select,
+                         predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov"),
                          predictors.op = "mean",
                          special.predictors = list(
                            list("desemp", 1992:2006, c("mean")),
                            list("gini", 1992:2006, c("mean")),
-                           list("rendad_pc", 1992:2006, c("mean")),
+                           list("log_rpc", 1992:2006, c("mean")),
                            list("pct_urb", 1992:2006, c("mean")),
-                           list("pct_jov", 1992:2006, c("mean")),
-                           list("freqesc", 1992:2006, c("mean")),
-                           list("homic", c(2006), c("mean")),
-                           list("tsuicid", 1992:2006, c("mean")),
-                           list("desp_pc", 1994:2006, c("mean"))
-                         ),
+                           list("pct_jov", 1992:2006, c("mean"))
+                       ),
                          time.predictors.prior = c(1992:2006),
                          dependent = "homic",
                          unit.variable = "tcode",
@@ -58,32 +54,131 @@ dataprep_m1 <- dataprep(foo = df_standardized,
                                                  41, 42, 43,
                                                  50, 51, 52, 53),
                          time.optimize.ssr = c(1992:2007),
-                         time.plot = c(1992:2014))
+                         time.plot = c(1992:2014)) # data preparation
 
-synth_out = dataprep_out %>% synth(neg = T, normalize = F)
+synth_m1 = dataprep_m1 %>% synth(neg = T, normalize = F) # synth control
 
-synth_out %>% path.plot(dataprep.res = dataprep_out, tr.intake = 2007)
-
-
-synth_control = dataprep_out$Y0plot %*% synth_out$solution.w
+synth_m1 %>% path.plot(dataprep.res = dataprep_m1, tr.intake = 2007) # plot
 
 
-print(synth.tables   <- synth.tab(
+synth_control = dataprep_m1$Y0plot %*% synth_out$solution.w # 
+
+
+print(synth.tables   <- synth.tab( # weights
   dataprep.res = dataprep_out,
   synth.res    = synth_out)
 )
 
 
 
-gaps.plot(synth_out, dataprep_out)
+gaps.plot(synth_m1, dataprep_m1) #gaps plot
 
 
-placebos <- generate.placebos(dataprep_out, synth_out, Sigf.ipop = 3)
+placebos <- generate.placebos(dataprep_m1, synth_m1, Sigf.ipop = 3) # placebo exercise
 
 
-# Com variável de homicídio
+# Com variável de homicídio para 2006
+
+dataprep_m2 <- dataprep(foo = df_select,
+                        predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc", "homic", "tsuicid", "desp_pc"),
+                        predictors.op = "mean",
+                        special.predictors = list(
+                          list("desemp", 1992:2006, c("mean")),
+                          list("gini", 1992:2006, c("mean")),
+                          list("rendad_pc", 1992:2006, c("mean")),
+                          list("pct_urb", 1992:2006, c("mean")),
+                          list("pct_jov", 1992:2006, c("mean")),
+                          list("freqesc", 1992:2006, c("mean")),
+                          list("homic", c(2006), c("mean")),
+                          list("tsuicid", 1992:2006, c("mean")),
+                          list("desp_pc", 1994:2006, c("mean"))
+                        ),
+                        time.predictors.prior = c(1992:2006),
+                        dependent = "homic",
+                        unit.variable = "tcode",
+                        time.variable = "ano",
+                        treatment.identifier = 26,
+                        controls.identifier = c(11, 12, 13, 14, 15, 16, 17,
+                                                21, 22, 23, 24, 25, 27, 28, 29,
+                                                31, 32, 33, 35,
+                                                41, 42, 43,
+                                                50, 51, 52, 53),
+                        time.optimize.ssr = c(1992:2007),
+                        time.plot = c(1992:2014))
+
+
+synth_m2 = dataprep_m2 %>% synth(neg = T, normalize = F) # synth control
+
+synth_m2 %>% path.plot(dataprep.res = dataprep_m2, tr.intake = 2007) # plot
+
+
+synth_control = dataprep_m2$Y0plot %*% synth_out$solution.w # 
+
+
+print(synth.tables   <- synth.tab( # weights
+  dataprep.res = dataprep_m2,
+  synth.res    = synth_m2)
+)
+
+
+
+gaps.plot(synth_m2, dataprep_m2) #gaps plot
+
+
+placebos <- generate.placebos(dataprep_m2, synth_m2, Sigf.ipop = 3) # placebo exercise
 
 # Padronizando variáveis
+
+dataprep_m3 <- dataprep(foo = df_standardized,
+                        predictors = c("desemp", "gini", "rendad_pc", "pct_urb", "pct_jov", "freqesc", "homic", "tsuicid", "desp_pc"),
+                        predictors.op = "mean",
+                        special.predictors = list(
+                          list("desemp", 1992:2006, c("mean")),
+                          list("gini", 1992:2006, c("mean")),
+                          list("rendad_pc", 1992:2006, c("mean")),
+                          list("pct_urb", 1992:2006, c("mean")),
+                          list("pct_jov", 1992:2006, c("mean")),
+                          list("freqesc", 1992:2006, c("mean")),
+                          list("homic", c(2006), c("mean")),
+                          list("tsuicid", 1992:2006, c("mean")),
+                          list("desp_pc", 1994:2006, c("mean"))
+                        ),
+                        time.predictors.prior = c(1992:2006),
+                        dependent = "homic",
+                        unit.variable = "tcode",
+                        time.variable = "ano",
+                        treatment.identifier = 26,
+                        controls.identifier = c(11, 12, 13, 14, 15, 16, 17,
+                                                21, 22, 23, 24, 25, 27, 28, 29,
+                                                31, 32, 33, 35,
+                                                41, 42, 43,
+                                                50, 51, 52, 53),
+                        time.optimize.ssr = c(1992:2007),
+                        time.plot = c(1992:2014))
+
+synth_m2 = dataprep_m2 %>% synth(neg = T, normalize = F) # synth control
+
+synth_m2 %>% path.plot(dataprep.res = dataprep_m2, tr.intake = 2007) # plot
+
+
+synth_control = dataprep_m2$Y0plot %*% synth_out$solution.w # 
+
+
+print(synth.tables   <- synth.tab( # weights
+  dataprep.res = dataprep_m2,
+  synth.res    = synth_m2)
+)
+
+
+
+gaps.plot(synth_m2, dataprep_m2) #gaps plot
+
+
+placebos <- generate.placebos(dataprep_m2, synth_m2, Sigf.ipop = 3) # placebo exercise
+
+#### TWFE ####
+
+
 
 # Homicídio média
 
