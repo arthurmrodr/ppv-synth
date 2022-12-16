@@ -5,47 +5,47 @@ library(tidyverse)
 
 # Reading dataframe generated in "data_treatment.R"
 
-df_join <- read_rds("data/db_ufs.RDS")
+df_join <- read_rds("data/db_ufs2.RDS")
 
 # Data preparation
 
 df_join$ano <- as.numeric(df_join$ano)
 df_join <- df_join %>% filter(ano >= 1992 & ano <= 2014)
-df_select <- df_join %>% select(id, tcode, ano, desemp, gini, rendad_pc, pop_tot, homic, popurb, freqesc, pop1519m, pop2024m)
+df_select <- df_join %>% select(id, tcode, ano, desemp, gini, rendad_pc, pop_tot, homic, popurb, freqesc, pop1519m, pop2024m, tsuicid, desp_gov)
 df_select <- df_select %>% mutate(tcode = substr(id, 1, 2))
 
 
-
-#df_select <- df_select %>%
-#  group_by(tcode) %>%
-#  mutate(homic = ifelse(is.na(homic), (dplyr::lag(homic) + dplyr::lead(homic)) / 2, homic)) # Caso não exista dado de homicídio, considera-se a média do ano anterior e seguinte
-
 df_select <- df_select %>% mutate(pct_urb = popurb / pop_tot,
                                   pct_jov = (pop1519m + pop2024m) / pop_tot,
-                                  log_rpc = log(rendad_pc)) # Gerando as variáveis necessárias
+                                  log_rpc = log(rendad_pc),
+                                  desp_pc = desp_gov / pop_tot) # Gerando as variáveis necessárias
 
 
 df_select$tcode <- as.numeric(df_select$tcode)
 
 df_select <- as.data.frame(df_select)
 
-df_standardized <- df_select %>% mutate_at(vars(desemp, gini, rendad_pc, homic, freqesc, pct_jov, pct_urb, log_rpc), scale)
+df_standardized <- df_select %>% mutate_at(vars(desemp, gini, rendad_pc, homic, freqesc, pct_jov, pct_urb, log_rpc, tsuicid, desp_pc), scale)
 
+df_standardized <- as.data.frame(df_standardized)
 
-# Rodando Controle Sintético
+#### Rodando Controle Sintético ####
 
+# Sem variável de homicídio
 
-dataprep_out <- dataprep(foo = df_standardized,
-                         predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc", "homic"),
+dataprep_m1 <- dataprep(foo = df_standardized,
+                         predictors = c("desemp", "gini", "rendad_pc", "pct_urb", "pct_jov", "freqesc", "homic", "tsuicid", "desp_pc"),
                          predictors.op = "mean",
                          special.predictors = list(
                            list("desemp", 1992:2006, c("mean")),
                            list("gini", 1992:2006, c("mean")),
-                           list("log_rpc", 1992:2006, c("mean")),
+                           list("rendad_pc", 1992:2006, c("mean")),
                            list("pct_urb", 1992:2006, c("mean")),
                            list("pct_jov", 1992:2006, c("mean")),
                            list("freqesc", 1992:2006, c("mean")),
-                           list("homic", c(2006), c("mean"))
+                           list("homic", c(2006), c("mean")),
+                           list("tsuicid", 1992:2006, c("mean")),
+                           list("desp_pc", 1994:2006, c("mean"))
                          ),
                          time.predictors.prior = c(1992:2006),
                          dependent = "homic",
@@ -81,19 +81,11 @@ gaps.plot(synth_out, dataprep_out)
 placebos <- generate.placebos(dataprep_out, synth_out, Sigf.ipop = 3)
 
 
+# Com variável de homicídio
 
-#df_complete <- df_join# %>% complete(tcode, ano = 1992:2014)
+# Padronizando variáveis
 
-#df_complete$homic <- as.numeric(df_complete$homic)
-#df_complete <- make.pbalanced(df_complete, balance.type = "fill")
+# Homicídio média
 
-#df_train <- df_complete %>% select(homic, ano, tcode)
-#df_train <- df_train %>% pivot_longer(df_train, cols = c(homic), names_to = c("tcode", "ano"), values_to = "homic")
+# Apenas nordeste
 
-#model <- train(df_complete, method = "randomForest")
-
-#weights <- synth(df_complete, weights = c(12, 27, 16, 13, 29, 23, 53, 32,
-#                                          52, 21, 51, 50, 31, 15, 25, 41,
-#                                          22, 24, 43, 11, 14, 42, 28,
-#                                          17))
-#print()

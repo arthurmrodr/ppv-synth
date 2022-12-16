@@ -48,9 +48,17 @@ pop2024m <- ipeadata("POP20_24M") %>%
   filter(uname == "States") # População masculina 20 a 24 anos
 pop2024m <- pop2024m %>% mutate(ano = substr(date, 1, 4)) %>% mutate(id = paste(tcode, "_", ano, sep = "")) %>% rename(pop2024m = value)
 
+tsuicid <- ipeadata("TSUICID") %>% 
+  filter(uname == "States") # Taxa de suicidio
+tsuicid <- tsuicid %>% mutate(ano = substr(date, 1, 4)) %>% mutate(id = paste(tcode, "_", ano, sep = "")) %>% rename(tsuicid = value)
+
+desp_gov <-ipeadata("DFDEFSE") %>% 
+  filter(uname == "States") # Despesa estadual em segurança e defesa pública
+desp_gov <- desp_gov %>% mutate(ano = substr(date, 1, 4)) %>% mutate(id = paste(tcode, "_", ano, sep = "")) %>% rename(desp_gov = value)
+
 # Tratando bases de dados
 
-df_join <- reduce(list(desemp, gini, rendad_pc, pop_tot, homic, pop_urb, freqesc, pop1519m, pop2024m),
+df_join <- reduce(list(desemp, gini, rendad_pc, pop_tot, homic, pop_urb, freqesc, pop1519m, pop2024m, tsuicid, desp_gov),
                   ~.x %>%
                     full_join(.y, by="id"))
 
@@ -58,4 +66,4 @@ df_join <- df_join %>% mutate(ano = substr(id, 4, 7))
 
 # Criando arquivo RDS
 
-write_rds(df_join, "data/db_ufs.RDS")
+write_rds(df_join, "data/db_ufs2.RDS")
