@@ -49,7 +49,7 @@ pop2024m <- ipeadata("POP20_24M") %>%
 pop2024m <- pop2024m %>% mutate(ano = substr(date, 1, 4)) %>% mutate(id = paste(tcode, "_", ano, sep = "")) %>% rename(pop2024m = value)
 
 tsuicid <- ipeadata("TSUICID") %>% 
-  filter(uname == "States") # Taxa de suicidio
+  filter(uname == "Sttes") # Taxa de suicidio
 tsuicid <- tsuicid %>% mutate(ano = substr(date, 1, 4)) %>% mutate(id = paste(tcode, "_", ano, sep = "")) %>% rename(tsuicid = value)
 
 desp_gov <-ipeadata("DFDEFSE") %>% 
