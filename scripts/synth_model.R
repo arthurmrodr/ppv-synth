@@ -1,9 +1,9 @@
 library(Synth)
 library(tidyselect)
 library(tidyverse)
-library(plm)
+library(plm) # erro no linux
 library(fixest)
-library(did)
+library(did) # erro no linux
 library(stargazer)
 library(SCtools)
 library(table1)
@@ -126,15 +126,15 @@ mspe.plot(placebos, discard.extreme = TRUE, mspe.limit = 1, plot.hist = TRUE)
 # Com variável de homicídio para 2006
 
 dataprep_m2 <- dataprep(foo = df_select,
-                        predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov"),
+                          predictors = c("desemp", "gini", "log_rpc", "pct_urb", "pct_jov", "freqesc", "tsuicid", "desp_pc"),
                         predictors.op = "mean",
                         special.predictors = list(
-                          list("desemp", 1992:2006, c("mean")),
-                          list("gini", 1992:2006, c("mean")),
-                          list("log_rpc", 1992:2006, c("mean")),
-                          list("pct_urb", 1992:2006, c("mean")),
-                          list("pct_jov", 1992:2006, c("mean")),
-                          list("homic", c(2006), c("mean"))
+                          list("desemp", c(1992:1999, 2001:2006), c("mean")),
+                          list("gini", c(1992:1999, 2001:2006), c("mean")),
+                          list("log_rpc", c(1992:1999, 2001:2006), c("mean")),
+                          list("pct_urb", 2000, c("mean")),
+                          list("pct_jov", 2000, c("mean")),
+                          list("homic", 2006, c("mean"))
                         ),
                         time.predictors.prior = c(1992:2006),
                         dependent = "homic",
@@ -143,11 +143,11 @@ dataprep_m2 <- dataprep(foo = df_select,
                         treatment.identifier = 26,
                         controls.identifier = c(11, 12, 13, 14, 15, 16, 17,
                                                 21, 22, 23, 24, 25, 27, 28, 29,
-                                                31, 32, 33, 35,
+                                               31, 32, 35,
                                                 41, 42, 43,
                                                 50, 51, 52, 53),
-                        time.optimize.ssr = c(1992:2007),
-                        time.plot = c(1992:2014))
+                        time.optimize.ssr = c(1996:2007),
+                        time.plot = c(1992:2011))
 
 
 synth_m2 = dataprep_m2 %>% synth(neg = T, normalize = F) # synth control
@@ -155,7 +155,7 @@ synth_m2 = dataprep_m2 %>% synth(neg = T, normalize = F) # synth control
 synth_m2 %>% path.plot(dataprep.res = dataprep_m2, tr.intake = 2007) # plot
 
 
-synth_control2 = dataprep_m2$Y0plot %*% synth_out$solution.w # 
+#synth_control2 = dataprep_m2$Y0plot %*% synth_out$solution.w # 
 
 
 print(synth.tables   <- synth.tab( # weights
