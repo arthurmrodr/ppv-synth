@@ -1,7 +1,7 @@
 library(Synth)
 library(tidyselect)
 library(tidyverse)
-library(plm) # erro no linux
+library(plm)
 library(fixest)
 library(did) # erro no linux
 library(stargazer)
@@ -158,7 +158,7 @@ synth_m2 %>% path.plot(dataprep.res = dataprep_m2, tr.intake = 2007) # plot
 #synth_control2 = dataprep_m2$Y0plot %*% synth_out$solution.w # 
 
 
-print(synth.tables   <- synth.tab( # weights
+  print(synth.tables   <- synth.tab( # weights
   dataprep.res = dataprep_m2,
   synth.res    = synth_m2)
 )
@@ -232,7 +232,16 @@ summary(reg_plain)
 
 reg_controls <- plm(homic ~ tratamento  + gini + desemp + log_rpc  , data = df_twfe)
 summary(reg_controls)
-stargazer(reg_controls, type = "latex")
+
+regc1 <- plm(homic ~ tratamento + gini, data = df_twfe)
+regc2 <- plm(homic ~ tratamento + gini + desemp, data = df_twfe)
+regc3 <- plm(homic ~ tratamento + gini + desemp + log_rpc, data = df_twfe)
+regc4 <- plm(homic ~ tratamento + gini + desemp + log_rpc + freqesc, data = df_twfe)
+regc5 <- plm(homic ~ tratamento + gini + desemp + log_rpc + freqesc + tsuicid, data = df_twfe)
+regc6 <- plm(homic ~ tratamento + gini + desemp + log_rpc + freqesc + tsuicid + desp_pc, data = df_twfe)
+
+
+stargazer(reg_plain, regc1, regc2, regc3, regc4, regc5, regc6, float.env = "sidewaystable")
 #event study sem controles
 
 twfe_1 <- fixest::feols(homic ~
