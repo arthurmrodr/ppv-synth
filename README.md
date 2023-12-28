@@ -1,6 +1,7 @@
-# Avaliação de impacto Pacto pela Vida
+# Impact Evaluation of Pacto Pela Vida using Synthetic Control Security Intervention
 
+This is a brief exploration on Synthetic Control methods in R. For that, I study the implementation of Pacto Pela Vida (a result-based management program in public security) in Brazilian State of Pernambuco.
 
-* Os papers relevantes de controle sintético esto disponpiveis em /papers
+* Relevant Synthetic Control papers are available in '/papers'
 
-* Tutorial do pacote Synth disponível [aqui](https://rpubs.com/danilofreire/synth). Exemplos de aplicação disponíveis [aqui](https://mixtape.scunning.com/10-synthetic_control), [aqui](https://lost-stats.github.io/Model_Estimation/Research_Design/synthetic_control_method.html) e [aqui](https://matheusfacure.github.io/python-causality-handbook/15-Synthetic-Control.html).
+* Tutorial of Synth R package available [here](https://rpubs.com/danilofreire/synth). Examples of its implementation available [here](https://mixtape.scunning.com/10-synthetic_control), [here](https://lost-stats.github.io/Model_Estimation/Research_Design/synthetic_control_method.html) and [here](https://matheusfacure.github.io/python-causality-handbook/15-Synthetic-Control.html).
